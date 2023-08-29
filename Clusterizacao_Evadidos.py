@@ -78,10 +78,10 @@ cluster_pipeline = pipeline.Pipeline([
 ])
 
 # Ajustando o pipeline aos dados
-model_cluster.fit(X_encoded, y_dummy)
+cluster_pipeline.fit(X_encoded, y_dummy)
 # %%
 # Adicionando os rótulos de cluster de volta ao DataFrame original
-df['cluster_labels'] = model_cluster.labels_
+df['cluster_labels'] = cluster_pipeline.named_steps['model_cluster'].labels_
 
 print(df)
 # %% 
