@@ -17,7 +17,7 @@ pd.set_option("display.max_columns", 1000)
 
 # %%
 # Carregamento de Dados
-df = pd.read_csv("bd_alunos_evadidos.csv",sep=';', encoding='utf-8')
+df = pd.read_csv("C:/Users/Mariana Moledo/Documents/GitHub/tcc_mba_cd/datasets/bd_alunos_evadidos.csv",sep=';', encoding='utf-8')
 df.columns
 
 # %%
@@ -86,7 +86,7 @@ X_transform
 # %%
 # Seleção de Características por Variância:
 
-var_feature_importance = feature_selection.VarianceThreshold(0.015)
+var_feature_importance = feature_selection.VarianceThreshold(0.03)
 var_feature_importance.set_output(transform='pandas')
 X_transform_filter = var_feature_importance.fit_transform(X_transform)
 X_transform_filter
@@ -135,6 +135,12 @@ cluster_labels
 # %%
 X_transform_filter['cluster_name'] = model_cluster.labels_
 X_transform_filter
+
+
+# %%
+# Estatísticas descritivas para cada cluster
+estatisticas_clusters = X_transform_filter.groupby('cluster_name').agg(['mean', 'median', 'std', 'count'])
+print(estatisticas_clusters)
 
 
 
