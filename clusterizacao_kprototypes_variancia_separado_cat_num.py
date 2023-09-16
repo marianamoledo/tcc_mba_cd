@@ -1,4 +1,4 @@
-# %%
+# %% 
 # Importar as bibliotecas necessárias
 import pandas as pd
 from sklearn import preprocessing
@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 from sklearn.feature_selection import VarianceThreshold
 from yellowbrick.cluster import KElbowVisualizer
 import seaborn
-from sklearn.cluster import KMeans
+from kmodes.kprototypes import KPrototypes
 import matplotlib.pyplot as plt
 
 # Definição de Opções de Exibição do Pandas:
@@ -50,81 +50,55 @@ df['TURNOATUAL'] = df['TURNOATUAL'].fillna("TURNOATUAL_NAODEFINIDO")
 df['ANOINGRESSO'] = df['ANOINGRESSO'].astype(str)
 df['SEMESTREINGRESSO'] = df['SEMESTREINGRESSO'].astype(str)
 
-
-# %%
 # Separar variáveis categóricas e numéricas
 # Seleciona colunas do tipo 'object'
 cat_features = df.select_dtypes(include=['object'])
+
 # Seleciona colunas que não são do tipo 'object'
 num_features = df.select_dtypes(exclude=['object'])
 
-# %%
 # Codificação One-Hot de Variáveis Categóricas
 onehot = OneHotEncoder(variables=cat_features.columns.tolist())
 X_transform_cat = onehot.fit_transform(cat_features)
-X_transform_cat
 
-# %%
 # Normalização Min-Max das variáveis numéricas
 min_max_num = preprocessing.MinMaxScaler()
 min_max_num.set_output(transform='pandas')
-
 X_transform_num = min_max_num.fit_transform(num_features)
-X_transform_num
 
-# %%
 # Seleção de Características por Variância para as variáveis categóricas
-var_feature_importance_cat = VarianceThreshold(0.15)
+var_feature_importance_cat = VarianceThreshold(0.1)
 var_feature_importance_cat.set_output(transform='pandas')
 X_transform_cat_filtered = var_feature_importance_cat.fit_transform(
     X_transform_cat)
-X_transform_cat_filtered
 
-# %%
 # Seleção de Características por Variância para as variáveis numéricas
 var_feature_importance_num = VarianceThreshold(0.01)
 var_feature_importance_num.set_output(transform='pandas')
 X_transform_num_filtered = var_feature_importance_num.fit_transform(
     X_transform_num)
-X_transform_num_filtered
 
-# %%
 # Concatenar as features categóricas e numéricas após a seleção por variância
 X_transform_final = pd.concat([pd.DataFrame(
     X_transform_cat_filtered), pd.DataFrame(X_transform_num_filtered)], axis=1)
-X_transform_final
-# %%
-# Criação de uma instância do modelo KMeans para realizar a clusterização
-model_cluster = KMeans(random_state=42, max_iter=1000)
-model_cluster
 
-# %%
-# Verifique se há NaNs no DataFrame
-nan_check = X_transform_final.isna()
+# Criação de uma instância do modelo K-Prototypes para realizar a clusterização
+model_cluster = KPrototypes(n_clusters=5, n_init=10, verbose=2, random_state=42, max_iter=1000)
 
+# Codificar manualmente as variáveis categóricas como numéricas
+label_encoder = preprocessing.LabelEncoder()
+for column in cat_features.columns:
+    df[column] = label_encoder.fit_transform(df[column])
 
-# Filtre as linhas com True
-rows_with_nan = X_transform_final[nan_check.any(axis=1)]
-rows_with_nan
-# %%
-# Visualização do gráfico de cotovelo para escolher o número ideal de clusters
-visualizer = KElbowVisualizer(model_cluster, k=(2, 12))
-visualizer.fit(X_transform_final)
-visualizer.show()
+# Ajustar o modelo aos dados
+model_cluster.fit(X_transform_final, categorical=list(range(len(cat_features.columns))))
 
-# %%
-# Criar o modelo KMeans com o número ideal de clusters
-model_cluster = KMeans(n_clusters=visualizer.elbow_value_)
-model_cluster.fit(X_transform_final)
-
-# %%
 # Atribuir rótulos de cluster ao DataFrame original
 X_transform_final['cluster_name'] = model_cluster.labels_
-X_transform_final
-# %%
+
 # Estatísticas descritivas para cada cluster
 summary = X_transform_final.groupby(['cluster_name']).mean()
-summary
+
 # %%
 # Visualização das estatísticas em um mapa de calor
 seaborn.heatmap(summary, cmap='viridis')
@@ -132,7 +106,7 @@ seaborn.heatmap(summary, cmap='viridis')
 # %%
 # Criar subconjuntos de dados para cada cluster
 clusters_data = []
-for cluster_id in range(visualizer.elbow_value_):
+for cluster_id in range(5):  # Defina o número de clusters desejado
     cluster_data = X_transform_final[X_transform_final['cluster_name'] == cluster_id].drop(
         'cluster_name', axis=1)
     clusters_data.append(cluster_data)
@@ -157,5 +131,6 @@ plt.xlabel('Componente Principal 1')
 plt.ylabel('Componente Principal 2')
 plt.title('Visualização dos Clusters Após PCA')
 plt.show()
+
 
 # %%
