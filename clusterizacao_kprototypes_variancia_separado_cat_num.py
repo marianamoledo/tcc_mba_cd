@@ -124,7 +124,7 @@ for cluster_id, pca_model in enumerate(pca_models):
     reduced_data = pca_model.transform(cluster_data)
 
     plt.scatter(reduced_data[:, 0], reduced_data[:, 1],
-                label=f'Cluster {cluster_id}')
+                label=f'Cluster {cluster_id}') 
 
 plt.legend()
 plt.xlabel('Componente Principal 1')
