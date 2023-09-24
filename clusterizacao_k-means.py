@@ -1,3 +1,4 @@
+# %% 
 # Importar as bibliotecas necessárias
 import pandas as pd
 import seaborn as sns
