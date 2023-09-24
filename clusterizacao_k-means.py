@@ -193,7 +193,6 @@ model_cluster = cluster.KMeans(n_clusters=visualizer.elbow_value_)
 # %%
 model_cluster.fit(X_transform_filtered)
 
-
 # %%
 cluster_labels = model_cluster.predict(X_transform_filtered)
 cluster_labels
@@ -207,8 +206,19 @@ X_transform_filtered
 summary = X_transform_filtered.groupby(['cluster_name']).mean()
 
 # %%
-# Visualização das estatísticas em um mapa de calor
-sns.heatmap(summary, cmap='viridis')
+# Crie um mapa de calor
+plt.figure(figsize=(10, 6))
+sns.heatmap(summary, annot=True, cmap='viridis', fmt=".2f")
+
+# Adicione rótulos aos eixos
+plt.xlabel('Estatísticas')
+plt.ylabel('Clusters')
+
+# Adicione um título ao gráfico
+plt.title('Mapa de Calor das Estatísticas dos Clusters')
+
+# Exiba o mapa de calor
+plt.show()
 
 # %%
 # Criar subconjuntos de dados para cada cluster
@@ -238,8 +248,6 @@ plt.xlabel('Componente Principal 1')
 plt.ylabel('Componente Principal 2')
 plt.title('Visualização dos Clusters Após PCA')
 plt.show()
-
-
  # %%
 from sklearn.metrics import silhouette_score
 
@@ -253,5 +261,5 @@ print(f'Silhouette Score: {silhouette_avg}')
 # Se o Silhouette Score estiver próximo de +1, os clusters estão bem separados.
 # Se o Silhouette Score estiver próximo de 0, os clusters têm sobreposição.
 # Se o Silhouette Score estiver próximo de -1, os pontos foram atribuídos ao cluster errado.
-# %%
 
+# %%
