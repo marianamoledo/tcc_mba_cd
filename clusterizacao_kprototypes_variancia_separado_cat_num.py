@@ -50,13 +50,18 @@ df['TURNOATUAL'] = df['TURNOATUAL'].fillna("TURNOATUAL_NAODEFINIDO")
 df['ANOINGRESSO'] = df['ANOINGRESSO'].astype(str)
 df['SEMESTREINGRESSO'] = df['SEMESTREINGRESSO'].astype(str)
 
+# %% 
 # Separar variáveis categóricas e numéricas
 # Seleciona colunas do tipo 'object'
 cat_features = df.select_dtypes(include=['object'])
+cat_features.columns
 
+# %% 
 # Seleciona colunas que não são do tipo 'object'
 num_features = df.select_dtypes(exclude=['object'])
+num_features.columns
 
+# %% 
 # Codificação One-Hot de Variáveis Categóricas
 onehot = OneHotEncoder(variables=cat_features.columns.tolist())
 X_transform_cat = onehot.fit_transform(cat_features)
@@ -133,4 +138,17 @@ plt.title('Visualização dos Clusters Após PCA')
 plt.show()
 
 
+ # %%
+from sklearn.metrics import silhouette_score
+
+# Calcule o Silhouette Score para os clusters gerados pelo modelo
+silhouette_avg = silhouette_score(X_transform_final.drop('cluster_name', axis=1), model_cluster.labels_)
+
+# Imprima o valor do Silhouette Score
+print(f'Silhouette Score: {silhouette_avg}')
+
+#A interpretação do Silhouette Score pode ser feita da seguinte forma:
+# Se o Silhouette Score estiver próximo de +1, os clusters estão bem separados.
+# Se o Silhouette Score estiver próximo de 0, os clusters têm sobreposição.
+# Se o Silhouette Score estiver próximo de -1, os pontos foram atribuídos ao cluster errado.
 # %%

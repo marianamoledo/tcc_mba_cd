@@ -75,7 +75,7 @@ X_transform_num
 
 # %%
 # Seleção de Características por Variância para as variáveis categóricas
-var_feature_importance_cat = VarianceThreshold(0.1)
+var_feature_importance_cat = VarianceThreshold(0.24)
 var_feature_importance_cat.set_output(transform='pandas')
 X_transform_cat_filtered = var_feature_importance_cat.fit_transform(
     X_transform_cat)
