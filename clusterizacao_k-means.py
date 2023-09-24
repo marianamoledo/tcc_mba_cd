@@ -19,19 +19,20 @@ df = pd.read_csv(file_path, sep=';', encoding='utf-8')
 # Explorar os dados
 print("Informações sobre as colunas:")
 print(df.dtypes)
+
+# %%
 print("\nValores ausentes:")
 print(df.isnull().sum())
 
+# %%
 # Exploração das Variáveis Categóricas
 plt.figure(figsize=(20, 6))
 
-# %%
 # Frequência da variável 'AREACURSO'
 frequencia_areacurso = df['AREACURSO'].value_counts()
 print("\nFrequência da variável 'AREACURSO':")
 print(frequencia_areacurso)
 
-# %%
 # Gráfico de Barras
 sns.barplot(x=frequencia_areacurso.index, y=frequencia_areacurso.values)
 plt.title('Gráfico de Barras - Contagem por AREACURSO')
@@ -47,7 +48,7 @@ def agrupar_categorias(categoria):
         return 'Humanas'
     else:
         return 'Outras'
-# %%
+    
 # Criar uma nova coluna 'Grupo_area_curso'
 df['Grupo_area_curso'] = df['AREACURSO'].apply(agrupar_categorias)
 contagem_por_grupo_area_curso = df['Grupo_area_curso'].value_counts()
