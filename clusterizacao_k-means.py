@@ -99,18 +99,21 @@ cat_features = ['Grupo_criterio', 'SEMESTREINGRESSO', 'COR', 'ESTADOCIVIL', 'SEX
 df[cat_features] = df[cat_features].astype(str)
 onehot = OneHotEncoder(variables=cat_features)
 X_transform = onehot.fit_transform(df)
+X_transform
 
 # %%
 # Normalização Min-Max das variáveis numéricas
 min_max = MinMaxScaler()
 min_max.set_output(transform='pandas')
 X_transform = min_max.fit_transform(X_transform)
+X_transform
 
 # %%
 # Seleção de Características por Variância para as variáveis categóricas
 var_feature_importance = VarianceThreshold(0.21)
 var_feature_importance.set_output(transform='pandas')
 X_transform_filtered = var_feature_importance.fit_transform(X_transform)
+X_transform_filtered
 
 # %%
 # Encontrar o número ideal de clusters usando KElbowVisualizer
