@@ -12,7 +12,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 
 # Carregar os dados
-file_path = "C:/Users/Mariana Moledo/Documents/GitHub/tcc_mba_cd/datasets/bd_alunos_evadidos.csv"
+file_path = "datasets/bd_alunos_evadidos.csv"
 df = pd.read_csv(file_path, sep=';', encoding='utf-8')
 
 # %% 
@@ -124,7 +124,7 @@ visualizer.show()
 
 # %%
 # Criar e ajustar o modelo KMeans com o número ideal de clusters
-model_cluster = KMeans(n_clusters=visualizer.elbow_value_)
+model_cluster = KMeans(n_clusters=visualizer.elbow_value_, random_state=42)
 model_cluster.fit(X_transform_filtered)
 cluster_labels = model_cluster.predict(X_transform_filtered)
 
@@ -176,3 +176,7 @@ silhouette_avg = silhouette_score(X_transform_filtered.drop('cluster_name', axis
 print(f'Silhouette Score: {silhouette_avg}')
 
 # %%
+
+X_tree = X_transform.copy()
+X_tree['cluster_name'] = X_transform_filtered['cluster_name'].copy()
+X_tree.to_csv("features_cluster_name.csv", index=False, sep=";")
