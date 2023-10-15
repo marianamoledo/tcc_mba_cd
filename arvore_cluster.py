@@ -1,3 +1,4 @@
+# %%
 
 import pandas as pd
 from sklearn import tree
@@ -19,6 +20,7 @@ clf = tree.DecisionTreeClassifier()
 clf.fit(df[features], df[target])
 
 # %%
+
 
 plt.figure(dpi=400)
 tree.plot_tree(clf,feature_names=features,  
