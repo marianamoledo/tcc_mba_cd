@@ -10,14 +10,12 @@ from sklearn import cluster
 import matplotlib.pyplot as plt
 
 # %%
-df = pd.read_csv("C:/Users/Mariana Moledo/Documents/GitHub/tcc_mba_cd/datasets/bd_alunos_evadidos.csv",sep=';', encoding='utf-8')
-df.columns
+# Carregar os dados
+file_path = "datasets/bd_alunos_evadidos.csv"
+df = pd.read_csv(file_path, sep=';', encoding='utf-8')
 
 # %%
 df.dtypes
-
-# %% [markdown]
-# Análise Inicial
 
 # %%
 # Exibir as primeiras linhas do DataFrame para entender a estrutura dos dados
@@ -44,10 +42,6 @@ plt.ylabel('Contagem')
 plt.title('Distribuição de IDADE')
 plt.show()
 
-
-# %% [markdown]
-# Exploração das Variáveis Categóricas
-
 # %%
 # Visualizar a distribuição de uma variável categórica (por exemplo, SEXO)
 plt.figure(figsize=(6, 4))
@@ -58,23 +52,24 @@ plt.title('Distribuição de SEXO')
 plt.show()
 
 # %%
-#Frequência Estado Civil
+# Frequência da variável 'AREACURSO'
 frequencia_areacurso = df['AREACURSO'].value_counts()
-print(frequencia_areacurso)
 
-#Proporção Estado Civil
-proporcao_areacurso = df['AREACURSO'].value_counts(normalize=True)
-print(proporcao_areacurso)
+# Escolha uma paleta de cores com degradê
+palette = sns.dark_palette("#69d", len(frequencia_areacurso))
 
-#Gráfico de Barras
-plt.figure(figsize=(20, 6))
-sns.barplot(x=frequencia_areacurso.index, y=frequencia_areacurso.values)
-plt.title('Gráfico de Barras - Contagem por AREACURSO') #Adicionando título ao gráfico
-plt.xlabel('AREACURSO') #Adicionando rótulos aos eixos
-plt.ylabel('Frequência') #Adicionando rótulos aos eixos
+# Crie o gráfico de barras horizontal
+plt.figure(figsize=(10, 6))
+ax = sns.barplot(x=frequencia_areacurso.values, y=frequencia_areacurso.index, palette=palette, orient='h')
+
+# Adicione rótulos aos dados
+for i, v in enumerate(frequencia_areacurso.values):
+    ax.text(v + 3, i, str(v), color='gray', va='center', fontsize=10)
+
+plt.show()
 
 # %%
-# Crie uma função para agrupar as categorias em "Exatas" ou "Humanas"
+# Função para agrupar as categorias em "Exatas" ou "Humanas"
 def agrupar_categorias(categoria):
     if categoria in ['Ciências Exatas e da Terra', 'Engenharias']:
         return 'Exatas'
@@ -82,57 +77,87 @@ def agrupar_categorias(categoria):
         return 'Humanas'
     else:
         return 'Outras'
-
-# Aplique a função para criar uma nova coluna 'Grupo' no DataFrame
+    
+# Criar uma nova coluna 'Grupo_area_curso'
 df['Grupo_area_curso'] = df['AREACURSO'].apply(agrupar_categorias)
-
-# Visualize o DataFrame com a nova coluna 'Grupo'
-print(df[['AREACURSO', 'Grupo_area_curso']])
-
-# Use a função value_counts() para contar as ocorrências em cada grupo
 contagem_por_grupo_area_curso = df['Grupo_area_curso'].value_counts()
-
-# Exiba o resultado
+print("\nContagem por grupo 'Grupo_area_curso':")
 print(contagem_por_grupo_area_curso)
 
+# Gráfico de Barras Vertical
+plt.figure(figsize=(8, 4))
+
+# Crie o gráfico de barras vertical
+sns.barplot(x=contagem_por_grupo_area_curso.values, y=contagem_por_grupo_area_curso.index, color='skyblue')
+
+# Adicione rótulos aos dados
+for i, v in enumerate(contagem_por_grupo_area_curso.values):
+    plt.text(v + 3, i, str(v), color='black', va='center', fontsize=10)
+
+# Mostrar o gráfico
+plt.show()
+
 # %%
-#Frequência Estado Civil
+# %%
+# Frequência da variável 'ACAOAFIRMATIVA'
 frequencia_areafirmativa = df['ACAOAFIRMATIVA'].value_counts()
+print("\nFrequência da variável 'ACAOAFIRMATIVA':")
 print(frequencia_areafirmativa)
 
-#Proporção Estado Civil
-proporcao_areafirmativa = df['ACAOAFIRMATIVA'].value_counts(normalize=True)
-print(proporcao_areafirmativa)
-
-#Gráfico de Barras
+# %%
+# Gráfico de Barras
 plt.figure(figsize=(20, 6))
 sns.barplot(x=frequencia_areafirmativa.index, y=frequencia_areafirmativa.values)
-plt.title('Gráfico de Barras - Contagem por AREACURSO') #Adicionando título ao gráfico
-plt.xlabel('AREACURSO') # Adicionando rótulos aos eixos
-plt.ylabel('Frequência') # Adicionando rótulos aos eixos
+plt.title('Gráfico de Barras - Contagem por ACAOAFIRMATIVA')
+plt.xlabel('ACAOAFIRMATIVA')
+plt.ylabel('Frequência')
 
-# %% [markdown]
-# Vamos criar dois grupos: "Ampla Concorrência" e "Ações Afirmativas". As categorias "Ampla Concorrência" incluiriam aquelas em que não há critérios específicos de renda ou etnia, enquanto as categorias "Ações Afirmativas" incluiriam aquelas que têm critérios específicos de renda, etnia ou deficiência. 
 
 # %%
-# Crie uma função para agrupar as categorias
+# Função para agrupar as categorias em "Ampla Concorrência" ou "Ações Afirmativas"
 def categorias_to_grupo(categoria):
     if categoria in ['AC', 'A0']:
         return 'Ampla Concorrência'
     else:
         return 'Ações Afirmativas'
 
-# Aplique a função para criar uma nova coluna 'Grupo' no DataFrame
+# Criar uma nova coluna 'Grupo_criterio'
 df['Grupo_criterio'] = df['ACAOAFIRMATIVA'].apply(categorias_to_grupo)
-
-# Visualize o DataFrame com a nova coluna 'Grupo'
-print(df[['ACAOAFIRMATIVA', 'Grupo_criterio']])
-
-# Use a função value_counts() para contar as ocorrências em cada grupo
 contagem_por_grupo_criterio = df['Grupo_criterio'].value_counts()
-
-# Exiba o resultado
+print("\nContagem por grupo 'Grupo_criterio':")
 print(contagem_por_grupo_criterio)
 
-# %%
 
+# Gráfico de Barras Vertical
+plt.figure(figsize=(8, 4))
+
+# Crie o gráfico de barras vertical
+sns.barplot(x=contagem_por_grupo_criterio.values, y=contagem_por_grupo_criterio.index, color='grey')
+
+# Adicione rótulos aos dados
+for i, v in enumerate(contagem_por_grupo_criterio.values):
+    plt.text(v + 3, i, str(v), color='black', va='center', fontsize=10)
+
+# Mostrar o gráfico
+plt.show()
+
+# %%
+sexo_freq = df['SEXO'].value_counts()
+sexo_percentual = (df['SEXO'].value_counts(normalize=True) * 100).round(2)
+
+# Crie um DataFrame com as informações
+tabela_frequencia_sexo = pd.DataFrame({'Frequência': sexo_freq, 'Percentual (%)': sexo_percentual})
+
+# Exiba a tabela de frequência
+print(tabela_frequencia_sexo)
+#%%
+# Tabela de frequência e percentual para a coluna "Estado Civil"
+semestre_ingresso_freq = df['SEMESTREINGRESSO'].value_counts()
+semestre_ingresso_freq_percentual = (df['SEMESTREINGRESSO'].value_counts(normalize=True) * 100).round(2)
+
+# Crie um DataFrame com as informações
+tabela_frequencia_semestre_ingresso = pd.DataFrame({'Frequência': semestre_ingresso_freq, 'Percentual (%)': semestre_ingresso_freq_percentual})
+
+# Exiba a tabela de frequência
+print(tabela_frequencia_semestre_ingresso)
+# %%

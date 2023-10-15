@@ -10,9 +10,10 @@ from sklearn.feature_selection import VarianceThreshold
 from yellowbrick.cluster import KElbowVisualizer
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from sklearn import tree
 
 # Carregar os dados
-file_path = "C:/Users/Mariana Moledo/Documents/GitHub/tcc_mba_cd/datasets/bd_alunos_evadidos.csv"
+file_path = "datasets/bd_alunos_evadidos.csv"
 df = pd.read_csv(file_path, sep=';', encoding='utf-8')
 
 # %% 
@@ -20,24 +21,13 @@ df = pd.read_csv(file_path, sep=';', encoding='utf-8')
 print("Informações sobre as colunas:")
 print(df.dtypes)
 
+# %% 
+df.shape
+
 # %%
 print("\nValores ausentes:")
 print(df.isnull().sum())
 
-# %%
-# Exploração das Variáveis Categóricas
-plt.figure(figsize=(20, 6))
-
-# Frequência da variável 'AREACURSO'
-frequencia_areacurso = df['AREACURSO'].value_counts()
-print("\nFrequência da variável 'AREACURSO':")
-print(frequencia_areacurso)
-
-# Gráfico de Barras
-sns.barplot(x=frequencia_areacurso.index, y=frequencia_areacurso.values)
-plt.title('Gráfico de Barras - Contagem por AREACURSO')
-plt.xlabel('AREACURSO')
-plt.ylabel('Frequência')
 
 # %%
 # Função para agrupar as categorias em "Exatas" ou "Humanas"
@@ -55,19 +45,13 @@ contagem_por_grupo_area_curso = df['Grupo_area_curso'].value_counts()
 print("\nContagem por grupo 'Grupo_area_curso':")
 print(contagem_por_grupo_area_curso)
 
+
 # %%
 # Frequência da variável 'ACAOAFIRMATIVA'
 frequencia_areafirmativa = df['ACAOAFIRMATIVA'].value_counts()
 print("\nFrequência da variável 'ACAOAFIRMATIVA':")
 print(frequencia_areafirmativa)
 
-# %%
-# Gráfico de Barras
-plt.figure(figsize=(20, 6))
-sns.barplot(x=frequencia_areafirmativa.index, y=frequencia_areafirmativa.values)
-plt.title('Gráfico de Barras - Contagem por ACAOAFIRMATIVA')
-plt.xlabel('ACAOAFIRMATIVA')
-plt.ylabel('Frequência')
 
 # %%
 # Função para agrupar as categorias em "Ampla Concorrência" ou "Ações Afirmativas"
@@ -88,8 +72,7 @@ print(contagem_por_grupo_criterio)
 colunas_excluir = ['CODALUNO', 'STATUSFORMACAO', 'CR', 'CURSO', 'CODTURNOINGRESSO', 'CODTURNOATUAL',
                    'DISCIPLINA', 'NOTADISC', 'RESULTDISC', 'PERIODODISC', 'ANODESVINCULACAO',
                    'SEMESTREDESVINCULACAO', 'BAIRRO', 'CEP', 'CIDADE', 'CHCURSADA', 'TRANCAMENTOS',
-                   'TEMPOPERMANENCIA', 'NOME_CURSO', 'cep_destino', 'MOBILIDADE', 'Unnamed: 0',
-                   'DISTANCIA_NUM', 'ACAOAFIRMATIVA', 'AREACURSO', 'TURNOATUAL']
+                   'TEMPOPERMANENCIA', 'NOME_CURSO', 'MOBILIDADE', 'Unnamed: 0', 'ACAOAFIRMATIVA', 'AREACURSO', 'TURNOATUAL']
 
 df = df.drop(colunas_excluir, axis=1)
 
@@ -113,7 +96,7 @@ X_transform
 var_feature_importance = VarianceThreshold(0.21)
 var_feature_importance.set_output(transform='pandas')
 X_transform_filtered = var_feature_importance.fit_transform(X_transform)
-X_transform_filtered
+X_transform_filtered.columns
 
 # %%
 # Encontrar o número ideal de clusters usando KElbowVisualizer
@@ -176,8 +159,22 @@ plt.show()
 silhouette_avg = silhouette_score(X_transform_filtered.drop('cluster_name', axis=1), cluster_labels)
 print(f'Silhouette Score: {silhouette_avg}')
 
+#%% 
+features = X_transform_filtered.columns.tolist()[:-1]
+
+target = 'cluster_name'
+
+clf = tree.DecisionTreeClassifier()
+
+clf.fit(X_transform_filtered[features], X_transform_filtered[target])
+ 
 # %%
 
-X_tree = X_transform.copy()
-X_tree['cluster_name'] = X_transform_filtered['cluster_name'].copy()
-X_tree.to_csv("features_cluster_name.csv", index=False, sep=";")
+plt.figure(dpi=400)
+tree.plot_tree(clf,feature_names=features,  
+                filled=True)
+
+#%%
+#X_tree = X_transform.copy()
+#X_tree['cluster_name'] = X_transform_filtered['cluster_name'].copy()
+#X_tree.to_csv("features_cluster_name.csv", index=False, sep=";")
