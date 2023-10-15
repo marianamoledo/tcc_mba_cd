@@ -10,10 +10,12 @@ from sklearn.feature_selection import VarianceThreshold
 from yellowbrick.cluster import KElbowVisualizer
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from sklearn import tree
+import numpy as np
+
 
 # Carregar os dados
-file_path = "C:/Users/Mariana Moledo/Documents/GitHub/tcc_mba_cd/datasets/bd_alunos_evadidos.csv"
-df = pd.read_csv(file_path, sep=';', encoding='utf-8')
+df = pd.read_csv("datasets/bd_alunos_evadidos.csv", sep=";")
 
 # %% 
 # Explorar os dados
@@ -109,31 +111,26 @@ X_transform = min_max.fit_transform(X_transform)
 X_transform
 
 # %%
-# Seleção de Características por Variância para as variáveis categóricas
-var_feature_importance = VarianceThreshold(0.21)
-var_feature_importance.set_output(transform='pandas')
-X_transform_filtered = var_feature_importance.fit_transform(X_transform)
-X_transform_filtered
-
-# %%
-# Encontrar o número ideal de clusters usando KElbowVisualizer
-model_cluster = KMeans(random_state=42, max_iter=1000)
-visualizer = KElbowVisualizer(model_cluster, k=(2, 12))
-visualizer.fit(X_transform_filtered)
+model_cluster = KMeans(n_clusters=12, random_state=60, max_iter=1000)  # Defina a semente aleatória no modelo KMeans
+visualizer = KElbowVisualizer(model_cluster, k=(2, 12), random_state=60)  # Defina a semente aleatória no KElbowVisualizer
+visualizer.fit(X_transform)
 visualizer.show()
 
 # %%
 # Criar e ajustar o modelo KMeans com o número ideal de clusters
-model_cluster = KMeans(n_clusters=visualizer.elbow_value_)
-model_cluster.fit(X_transform_filtered)
-cluster_labels = model_cluster.predict(X_transform_filtered)
+model_cluster = KMeans(n_clusters=visualizer.elbow_value_, random_state=65)
+model_cluster.fit(X_transform)
+cluster_labels = model_cluster.predict(X_transform)
 
 # %%
 # Adicionar os rótulos dos clusters ao DataFrame
-X_transform_filtered['cluster_name'] = cluster_labels
+X_transform['cluster_name'] = cluster_labels
+print (X_transform['cluster_name'])
 
+# %%
 # Estatísticas descritivas para cada cluster
-summary = X_transform_filtered.groupby(['cluster_name']).mean()
+summary = X_transform.groupby(['cluster_name']).mean()
+print(summary)
 
 # %%
 # Criar um mapa de calor das estatísticas dos clusters
@@ -145,34 +142,84 @@ plt.title('Mapa de Calor das Estatísticas dos Clusters')
 plt.show()
 
 # %%
-# Criar subconjuntos de dados para cada cluster
-clusters_data = []
-for cluster_id in range(visualizer.elbow_value_):
-    cluster_data = X_transform_filtered[X_transform_filtered['cluster_name'] == cluster_id].drop('cluster_name', axis=1)
-    clusters_data.append(cluster_data)
+# Calcular o Silhouette Score para os clusters
+silhouette_avg = silhouette_score(X_transform.drop('cluster_name', axis=1), cluster_labels)
+print(f'Silhouette Score: {silhouette_avg}')
 
-# Aplicar PCA para cada subconjunto de dados do cluster
-pca_models = []
-for cluster_data in clusters_data:
-    pca = PCA(n_components=2)
-    pca.fit(cluster_data)
-    pca_models.append(pca)
+# %%
+np.random.seed(60)
+clf = tree.DecisionTreeClassifier(random_state=60) #algoritmo de arvore
+clf.fit(X_transform[X_transform.columns.tolist()[:-1]], X_transform['cluster_name']) # fit arvore
+features_importance = pd.Series(clf.feature_importances_, index=X_transform.columns.tolist()[:-1]) #pega a importancia das variaveis
+features_importance = features_importance.sort_values(ascending=False) #ordena
+print(features_importance)
 
-# Plotar os resultados do PCA para cada cluster
-for cluster_id, pca_model in enumerate(pca_models):
-    cluster_data = clusters_data[cluster_id]
-    reduced_data = pca_model.transform(cluster_data)
-    plt.scatter(reduced_data[:, 0], reduced_data[:, 1], label=f'Cluster {cluster_id}')
+# %%
+# Substitua 'features_selecionadas' pelas features mais importantes que você deseja usar
+# Defina um limite de importância
+limite_importancia = 0.01
 
-plt.legend()
-plt.xlabel('Componente Principal 1')
-plt.ylabel('Componente Principal 2')
-plt.title('Visualização dos Clusters Após PCA')
+# Selecione as características com importância acima do limite
+features_selecionadas = features_importance[features_importance >= limite_importancia].index.tolist()
+
+# Crie um novo DataFrame com as features selecionadas
+X_selected_features = X_transform[features_selecionadas]
+X_selected_features
+
+# %%
+
+# model_cluster = KMeans(n_clusters=12, random_state=65, max_iter=1000)  # Defina a semente aleatória no modelo KMeans
+#visualizer = KElbowVisualizer(model_cluster, k=(2, 12), random_state=65)  # Defina a semente aleatória no KElbowVisualizer
+#visualizer.fit(X_selected_features)
+#visualizer.show()
+
+# %%
+# Criar e ajustar o modelo KMeans com o número ideal de clusters
+# model_cluster_selected = KMeans(n_clusters=visualizer.elbow_value_, random_state=65)
+model_cluster.fit(X_selected_features)
+cluster_labels_selected = model_cluster.predict(X_selected_features)
+
+# Adicione os rótulos dos clusters ao DataFrame original ou a um novo DataFrame
+X_selected_features['cluster_name_selected'] = cluster_labels_selected
+
+# Visualize ou analise os resultados da clusterização
+print(X_selected_features['cluster_name_selected'].value_counts())
+
+# %%
+# Estatísticas descritivas para cada cluster
+summary_selected = X_selected_features.groupby(['cluster_name_selected']).mean()
+print(summary_selected)
+
+# %%
+# Criar um mapa de calor das estatísticas dos clusters
+plt.figure(figsize=(10, 6))
+sns.heatmap(summary_selected, annot=True, cmap='viridis', fmt=".2f")
+plt.xlabel('Estatísticas')
+plt.ylabel('Clusters')
+plt.title('Mapa de Calor das Estatísticas dos Clusters')
 plt.show()
 
 # %%
 # Calcular o Silhouette Score para os clusters
-silhouette_avg = silhouette_score(X_transform_filtered.drop('cluster_name', axis=1), cluster_labels)
+silhouette_avg = silhouette_score(X_selected_features.drop('cluster_name_selected', axis=1), cluster_labels)
 print(f'Silhouette Score: {silhouette_avg}')
 
+# %%
+X_selected_features
+features = X_selected_features.columns.tolist()[:-1]
+features
+
+target = 'cluster_name_selected'
+
+# %%
+
+clf = tree.DecisionTreeClassifier()
+
+clf.fit(X_selected_features[features], X_selected_features[target])
+
+# %%
+
+plt.figure(dpi=400)
+tree.plot_tree(clf,feature_names=features,  
+                filled=True)
 # %%

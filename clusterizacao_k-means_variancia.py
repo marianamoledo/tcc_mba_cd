@@ -110,30 +110,31 @@ X_transform
 
 # %%
 # Seleção de Características por Variância para as variáveis categóricas
-# var_feature_importance = VarianceThreshold(0.21)
-# var_feature_importance.set_output(transform='pandas')
-# X_transform_filtered = var_feature_importance.fit_transform(X_transform)
-# X_transform_filtered
+var_feature_importance = VarianceThreshold(0.21)
+var_feature_importance.set_output(transform='pandas')
+X_transform_filtered = var_feature_importance.fit_transform(X_transform)
+X_transform_filtered
 
 # %%
 # Encontrar o número ideal de clusters usando KElbowVisualizer
 model_cluster = KMeans(random_state=42, max_iter=1000)
 visualizer = KElbowVisualizer(model_cluster, k=(2, 12))
-visualizer.fit(X_transform)
+visualizer.fit(X_transform_filtered)
 visualizer.show()
 
 # %%
 # Criar e ajustar o modelo KMeans com o número ideal de clusters
 model_cluster = KMeans(n_clusters=visualizer.elbow_value_)
-model_cluster.fit(X_transform)
-cluster_labels = model_cluster.predict(X_transform)
+model_cluster.fit(X_transform_filtered)
+cluster_labels = model_cluster.predict(X_transform_filtered)
 
 # %%
 # Adicionar os rótulos dos clusters ao DataFrame
-X_transform['cluster_name'] = cluster_labels
+X_transform_filtered['cluster_name'] = cluster_labels
 
 # Estatísticas descritivas para cada cluster
-summary = X_transform.groupby(['cluster_name']).mean()
+summary = X_transform_filtered.groupby(['cluster_name']).mean()
+summary
 
 # %%
 # Criar um mapa de calor das estatísticas dos clusters
@@ -148,7 +149,7 @@ plt.show()
 # Criar subconjuntos de dados para cada cluster
 clusters_data = []
 for cluster_id in range(visualizer.elbow_value_):
-    cluster_data = X_transform[X_transform['cluster_name'] == cluster_id].drop('cluster_name', axis=1)
+    cluster_data = X_transform_filtered[X_transform_filtered['cluster_name'] == cluster_id].drop('cluster_name', axis=1)
     clusters_data.append(cluster_data)
 
 # Aplicar PCA para cada subconjunto de dados do cluster
@@ -172,7 +173,11 @@ plt.show()
 
 # %%
 # Calcular o Silhouette Score para os clusters
-silhouette_avg = silhouette_score(X_transform.drop('cluster_name', axis=1), cluster_labels)
+silhouette_avg = silhouette_score(X_transform_filtered.drop('cluster_name', axis=1), cluster_labels)
 print(f'Silhouette Score: {silhouette_avg}')
 
 # %%
+
+X_tree = X_transform.copy()
+X_tree['cluster_name'] = X_transform_filtered['cluster_name'].copy()
+X_tree.to_csv("features_cluster_name.csv", index=False, sep=";")
