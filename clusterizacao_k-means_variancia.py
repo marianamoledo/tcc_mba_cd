@@ -115,6 +115,10 @@ cluster_labels = model_cluster.predict(X_transform_filtered)
 # Adicionar os rótulos dos clusters ao DataFrame
 X_transform_filtered['cluster_name'] = cluster_labels
 
+# %% 
+summary_values = X_transform_filtered.groupby('cluster_name').size().reset_index(name='count_values')
+summary_values
+# %% 
 # Estatísticas descritivas para cada cluster
 summary = X_transform_filtered.groupby(['cluster_name']).mean()
 summary

@@ -17,6 +17,8 @@ df = pd.read_csv(file_path, sep=';', encoding='utf-8')
 # %%
 df.dtypes
 
+# %% 
+df.columns 
 # %%
 # Exibir as primeiras linhas do DataFrame para entender a estrutura dos dados
 print(df.head())
@@ -32,24 +34,6 @@ print(df.describe())
 # %%
 # Verificar a presença de valores ausentes
 print(df.isnull().sum())
-
-# %%
-# Visualizar a distribuição de uma variável numérica (por exemplo, ENEMLINGUAGEM)
-plt.figure(figsize=(8, 4))
-plt.hist(df['IDADE'], bins=20)
-plt.xlabel('IDADE')
-plt.ylabel('Contagem')
-plt.title('Distribuição de IDADE')
-plt.show()
-
-# %%
-# Visualizar a distribuição de uma variável categórica (por exemplo, SEXO)
-plt.figure(figsize=(6, 4))
-df['SEXO'].value_counts().plot(kind='bar')
-plt.xlabel('SEXO')
-plt.ylabel('Contagem')
-plt.title('Distribuição de SEXO')
-plt.show()
 
 # %%
 # Frequência da variável 'AREACURSO'
@@ -160,4 +144,43 @@ tabela_frequencia_semestre_ingresso = pd.DataFrame({'Frequência': semestre_ingr
 
 # Exiba a tabela de frequência
 print(tabela_frequencia_semestre_ingresso)
+
+#%%
+# Tabela de frequência e percentual para a coluna "Idade"
+idade_freq = df['IDADE'].value_counts()
+idade_freq_percentual = (df['IDADE'].value_counts(normalize=True) * 100).round(2)
+
+# Crie um DataFrame com as informações
+tabela_frequencia_idade = pd.DataFrame({'Frequência': idade_freq, 'Percentual (%)': idade_freq_percentual})
+
+# Exiba a tabela de frequência
+print(tabela_frequencia_idade)
+
+#%%
+# Tabela de frequência e percentual para a coluna "ESTADOCIVIL"
+ESTADOCIVIL_freq = df['ESTADOCIVIL'].value_counts()
+ESTADOCIVIL_freq_percentual = (df['ESTADOCIVIL'].value_counts(normalize=True) * 100).round(2)
+
+# Crie um DataFrame com as informações
+tabela_frequencia_ESTADOCIVIL = pd.DataFrame({'Frequência': ESTADOCIVIL_freq, 'Percentual (%)': ESTADOCIVIL_freq_percentual})
+
+# Exiba a tabela de frequência
+print(tabela_frequencia_ESTADOCIVIL)
+
+#%%
+# Tabela de frequência e percentual para a coluna "TURNOATUAL"
+TURNOATUAL_freq = df['TURNOATUAL'].value_counts()
+TURNOATUAL_freq_percentual = (df['TURNOATUAL'].value_counts(normalize=True) * 100).round(2)
+
+# Crie um DataFrame com as informações
+tabela_frequencia_TURNOATUAL = pd.DataFrame({'Frequência': TURNOATUAL_freq, 'Percentual (%)': TURNOATUAL_freq_percentual})
+
+# Exiba a tabela de frequência
+print(tabela_frequencia_TURNOATUAL)
+# %%
+#plb.plot(dataEvadidos.groupby(['TEMPOPERMANENCIA']))
+g= sns.catplot(x = "TEMPOPERMANENCIA", y = "CHCURSADA", data = df, kind = "bar")
+g.set_ylabels("Carga Horária Cursada (Evadidos)")
+g.set_xlabels("Tempo de Permanência (Evadidos)")
+plt.show()
 # %%
