@@ -13,7 +13,7 @@ from sklearn.metrics import silhouette_score
 from sklearn import tree
 
 # Carregar os dados
-file_path = "datasets/bd_alunos_evadidos.csv"
+file_path = "C:/Users/Mariana Moledo/Documents/GitHub/tcc_mba_cd/datasets/bd_alunos_evadidos.csv"
 df = pd.read_csv(file_path, sep=';', encoding='utf-8')
 
 # %% 
@@ -120,8 +120,9 @@ summary_values = X_transform_filtered.groupby('cluster_name').size().reset_index
 summary_values
 # %% 
 # Estatísticas descritivas para cada cluster
-summary = X_transform_filtered.groupby(['cluster_name']).mean()
+summary = X_transform_filtered.groupby(['cluster_name']).describe()
 summary
+
 
 # %%
 # Criar um mapa de calor das estatísticas dos clusters
